@@ -16,7 +16,7 @@ export default function Services({ pricing }: { pricing?: boolean }) {
   return (
     <>
       <PageHeader eyebrow="Services" title={c.title}>{c.intro}</PageHeader>
-      <section className="section pb-12"><div className="wrap grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{services.map((s) => <ServiceCard key={s.id} s={s} />)}</div></section>
+      <section className="section pb-12"><div className="wrap grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">{services.map((s) => <ServiceCard key={s.id} s={s} />)}</div></section>
       <section id="pricing" className="section scroll-mt-20 bg-beige">
         <div className="wrap">
           <p className="eyebrow">{c.pricingEyebrow}</p>

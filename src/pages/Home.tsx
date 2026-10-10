@@ -19,18 +19,18 @@ export default function Home() {
   return (
     <>
       <section className="hero-glow overflow-hidden bg-night">
-        <div className="wrap grid items-center gap-10 py-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-20">
-          <div className="rise">
-            <p className="eyebrow">{site.altTagline}</p>
-            <h1 className="mt-5 text-5xl leading-[1.05] text-plum sm:text-6xl lg:text-7xl">{rich(c.heroTitle)}</h1>
-            <p className="lead">{c.heroText}</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link to="/booking" className="btn-primary">{c.heroPrimary}</Link>
-              <Link to="/gallery" className="btn-ghost">{c.heroSecondary}</Link>
+        <div className="wrap grid grid-cols-[minmax(0,1.15fr)_minmax(96px,0.85fr)] items-center gap-3 py-8 min-[400px]:gap-4 sm:grid-cols-[1.1fr_0.9fr] sm:gap-10 sm:py-12 lg:gap-16 lg:py-20">
+          <div className="rise min-w-0">
+            <p className="eyebrow text-[8px] leading-tight tracking-[0.12em] min-[400px]:text-[9px] sm:text-xs sm:tracking-[0.28em]">{site.altTagline}</p>
+            <h1 className="mt-2 text-2xl leading-[1.05] text-plum min-[400px]:text-[28px] sm:mt-5 sm:text-6xl lg:text-7xl">{rich(c.heroTitle)}</h1>
+            <p className="lead mt-3 line-clamp-5 text-xs sm:mt-5 sm:line-clamp-none sm:text-lg">{c.heroText}</p>
+            <div className="mt-4 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-3">
+              <Link to="/booking" className="btn-primary !min-h-[40px] !px-2 !text-[9px] !tracking-[0.04em] min-[400px]:!text-[10px] sm:!min-h-[48px] sm:!px-7 sm:!text-sm sm:!tracking-wider">{c.heroPrimary}</Link>
+              <Link to="/gallery" className="btn-ghost !min-h-[40px] !px-2 !text-[9px] !tracking-[0.04em] min-[400px]:!text-[10px] sm:!min-h-[48px] sm:!px-7 sm:!text-sm sm:!tracking-wider">{c.heroSecondary}</Link>
             </div>
-            <p className="mt-8 flex items-center gap-3 text-sm text-plum/80"><span className="h-px w-10 bg-gold" />{c.heroNote}</p>
+            <p className="mt-4 flex items-center gap-2 text-[10px] text-plum/80 sm:mt-8 sm:gap-3 sm:text-sm"><span className="h-px w-5 shrink-0 bg-gold sm:w-10" />{c.heroNote}</p>
           </div>
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+          <div className="relative w-full max-w-[180px] justify-self-end lg:max-w-none">
             <div className="absolute -bottom-4 -right-4 h-full w-full rounded-t-[999px] border border-gold" aria-hidden="true" />
             <Visual src={site.heroImage} alt="BRAIDY SALON featured hairstyle" pattern="fulani" tone={0} ratio="4/5" className="relative rounded-t-[999px]" eager />
           </div>
@@ -66,7 +66,7 @@ export default function Home() {
         <div className="wrap">
           <p className="eyebrow">{c.servicesEyebrow}</p>
           <h2 className="h2">{c.servicesTitle}</h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{services.slice(0, 6).map((s) => <ServiceCard key={s.id} s={s} />)}</div>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-6 lg:grid-cols-3">{services.slice(0, 6).map((s) => <ServiceCard key={s.id} s={s} />)}</div>
           <Link to="/services" className="btn-primary mt-10">{c.servicesButton} <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
         </div>
       </section>

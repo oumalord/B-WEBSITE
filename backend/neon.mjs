@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { createHash, randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +8,6 @@ import pg from 'pg';
 
 const { Pool } = pg;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA_DIR = path.resolve(process.env.BRAIDY_DATA_DIR || path.join(ROOT, 'data'));
 const DIST_DIR = path.join(ROOT, 'dist');
 const MAX_BODY = 7 * 1024 * 1024;
 const STATUSES = ['new', 'confirmed', 'declined', 'done'];
@@ -18,8 +17,6 @@ const IMG = /^img\/[\w.-]+$/;
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is required. Set it in .env.local or your environment.');
 }
-
-mkdirSync(DATA_DIR, { recursive: true });
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 5, connectionTimeoutMillis: 10000 });
 pool.on('error', (error) => console.error('Neon database connection error:', error.message));
@@ -47,6 +44,16 @@ function sendJson(response, status, data) {
 }
 
 async function readJson(request) {
+  if (request.body !== undefined) {
+    if (typeof request.body === 'string' || Buffer.isBuffer(request.body)) {
+      try {
+        return JSON.parse(request.body.toString());
+      } catch {
+        throw new HttpError(400, 'Invalid JSON body');
+      }
+    }
+    return request.body ?? {};
+  }
   const chunks = [];
   let size = 0;
   await new Promise((resolve, reject) => {
@@ -137,7 +144,7 @@ function sendImage(response, image) {
   response.end(image.data);
 }
 
-async function handleApi(request, response, url) {
+export async function handleApi(request, response, url) {
   const method = request.method ?? 'GET';
   const pathname = url.pathname;
   const body = ['POST', 'PUT', 'PATCH'].includes(method) ? await readJson(request) : {};
@@ -407,23 +414,33 @@ const server = createServer(async (request, response) => {
   }
 });
 
+let schemaPromise;
+export function ensureSchema() {
+  schemaPromise ??= pool.query(SCHEMA);
+  return schemaPromise;
+}
+
 async function start() {
-  await pool.query(SCHEMA);
+  await ensureSchema();
   server.listen(port, '127.0.0.1', () => console.log(`Neon API ready at http://127.0.0.1:${port}`));
 }
 
-start().catch(async (error) => {
-  console.error('Could not connect to Neon. Check DATABASE_URL and Neon network access.');
-  console.error(error.message);
-  await pool.end();
-  process.exitCode = 1;
-});
+const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
-for (const signal of ['SIGINT', 'SIGTERM']) {
-  process.on(signal, () => {
-    server.close(async () => {
-      await pool.end();
-      process.exit(0);
-    });
+if (isDirectExecution) {
+  start().catch(async (error) => {
+    console.error('Could not connect to Neon. Check DATABASE_URL and Neon network access.');
+    console.error(error.message);
+    await pool.end();
+    process.exitCode = 1;
   });
+
+  for (const signal of ['SIGINT', 'SIGTERM']) {
+    process.on(signal, () => {
+      server.close(async () => {
+        await pool.end();
+        process.exit(0);
+      });
+    });
+  }
 }

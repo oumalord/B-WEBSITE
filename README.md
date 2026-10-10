@@ -24,11 +24,15 @@ npm start
 
 The built website and API are served together on `http://127.0.0.1:3001`.
 
+## Deploy to Vercel
+
+The `api/[...path].mjs` serverless function handles the Neon-backed API. Add `DATABASE_URL` to the Vercel project's Environment Variables for every environment you deploy, then redeploy. `vercel.json` configures the Vite output and includes the database schema in the function bundle.
+
 ## Local data
 
 The local SQLite database at `data/braidy.sqlite` and uploads in `public/uploads/` remain as a backup after migration. New site content, bookings, admin accounts, sessions, invitations, and uploaded photos are stored in Neon. Set `BRAIDY_API_PORT` to change the API port.
 
-Open `/#/admin` and create the first admin account with an email address and a password of at least 10 characters. Additional admins can be invited by email from the Admins tab; invitations are stored locally and do not send email. An invited person creates an account using the invited email address.
+Open `/#/admin` and create the first admin account with an email address and a password of at least 10 characters. Additional admins can be invited by email from the Admins tab; invitations are stored in Neon and do not send email. An invited person creates an account using the invited email address.
 
 ## Content defaults
 

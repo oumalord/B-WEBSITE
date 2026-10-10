@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "functions": {
     "api/[...path].mjs": {
-      "includeFiles": ["backend/schema.sql"]
+      "includeFiles": "backend/schema.sql"
     }
   }
 }

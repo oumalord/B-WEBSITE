@@ -40,6 +40,9 @@
     background-image: radial-gradient(55% 90% at 50% 0%, rgba(201, 162, 92, 0.25), transparent 70%);
     border-top: 1px solid rgba(201, 162, 92, 0.35);
   }
+  .service-marquee { overflow: hidden; }
+  .service-marquee-track { display: flex; width: max-content; animation: service-marquee 22s linear infinite; }
+  .service-marquee-group { @apply flex shrink-0 items-center gap-8 px-4 font-serif text-xs uppercase tracking-[0.18em] text-gold/90 sm:gap-12 sm:px-8 sm:text-sm; }
 }
 
 @keyframes rise {
@@ -47,7 +50,12 @@
   to { opacity: 1; transform: none; }
 }
 
+@keyframes service-marquee {
+  to { transform: translateX(-50%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .service-marquee-track { animation: none; }
 }

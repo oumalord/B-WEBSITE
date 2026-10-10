@@ -12,6 +12,7 @@ import { usePageMeta } from '../lib/meta';
 import { rich } from '../lib/rich';
 
 const icons = [Sparkles, Leaf, Crown, Heart];
+const marqueeServices = services.filter((service) => ['knotless', 'box', 'cornrows'].includes(service.id));
 
 export default function Home() {
   const c = copy.home;
@@ -24,8 +25,7 @@ export default function Home() {
             <p className="eyebrow text-[8px] leading-tight tracking-[0.12em] min-[400px]:text-[9px] sm:text-xs sm:tracking-[0.28em]">{site.altTagline}</p>
             <h1 className="mt-2 text-2xl leading-[1.05] text-plum min-[400px]:text-[28px] sm:mt-5 sm:text-6xl lg:text-7xl">{rich(c.heroTitle)}</h1>
             <p className="lead mt-3 line-clamp-5 text-xs sm:mt-5 sm:line-clamp-none sm:text-lg">{c.heroText}</p>
-            <div className="mt-4 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-3">
-              <Link to="/booking" className="btn-primary !min-h-[40px] !px-2 !text-[9px] !tracking-[0.04em] min-[400px]:!text-[10px] sm:!min-h-[48px] sm:!px-7 sm:!text-sm sm:!tracking-wider">{c.heroPrimary}</Link>
+            <div className="mt-4 flex sm:mt-8">
               <Link to="/gallery" className="btn-ghost !min-h-[40px] !px-2 !text-[9px] !tracking-[0.04em] min-[400px]:!text-[10px] sm:!min-h-[48px] sm:!px-7 sm:!text-sm sm:!tracking-wider">{c.heroSecondary}</Link>
             </div>
             <p className="mt-4 flex items-center gap-2 text-[10px] text-plum/80 sm:mt-8 sm:gap-3 sm:text-sm"><span className="h-px w-5 shrink-0 bg-gold sm:w-10" />{c.heroNote}</p>
@@ -37,8 +37,14 @@ export default function Home() {
         </div>
       </section>
 
-      <div aria-hidden="true" className="border-y border-gold/20 bg-plum-deep py-4">
-        <ul className="wrap flex flex-wrap justify-center gap-x-8 gap-y-1 font-serif text-xs uppercase tracking-[0.3em] text-gold/80 sm:text-sm">{services.slice(0, 6).map((s) => <li key={s.id}>{s.name}</li>)}</ul>
+      <div className="service-marquee border-y border-gold/20 bg-plum-deep py-3" aria-label="Featured styles">
+        <div className="service-marquee-track">
+          {[false, true].map((duplicate) => (
+            <ul key={String(duplicate)} aria-hidden={duplicate || undefined} className="service-marquee-group">
+              {marqueeServices.map((service) => <li key={service.id}>{service.name}</li>)}
+            </ul>
+          ))}
+        </div>
       </div>
 
       <section aria-label="Highlights" className="border-b border-plum/10 bg-beige">

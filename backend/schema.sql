@@ -40,10 +40,16 @@ CREATE TABLE IF NOT EXISTS images (
   data BYTEA NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS media (
+  path TEXT PRIMARY KEY,
+  content_type TEXT NOT NULL CHECK (content_type IN ('video/mp4', 'video/webm')),
+  data BYTEA NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 CREATE INDEX IF NOT EXISTS bookings_created_at_idx ON bookings (created_at DESC);
 
 COMMENT ON TABLE content IS 'Site settings, page copy, services, and gallery content.';
-COMMENT ON COLUMN content.value IS 'JSONB document. Service IDs are referenced by bookings.service; image paths reference images.path.';
+COMMENT ON COLUMN content.value IS 'JSONB document. Service IDs are referenced by bookings.service; image and video paths reference images.path and media.path.';
 COMMENT ON TABLE bookings IS 'Customer appointment requests.';
 COMMENT ON COLUMN bookings.service IS 'Logical reference to a service ID in content.value.services.';
 COMMENT ON TABLE admins IS 'Local admin accounts with salted password hashes.';
@@ -51,3 +57,5 @@ COMMENT ON TABLE invites IS 'Pending admin invitations, matched to accounts by e
 COMMENT ON TABLE sessions IS 'Hashed sign-in tokens; admin_id references admins.id.';
 COMMENT ON TABLE images IS 'Uploaded image bytes stored in Neon.';
 COMMENT ON COLUMN images.path IS 'Logical image key referenced from content.value, for example img/<filename>.';
+COMMENT ON TABLE media IS 'Uploaded MP4/WebM clips referenced from content.value.';
+COMMENT ON COLUMN media.path IS 'Logical video key referenced from content.value, for example media/<filename>.';

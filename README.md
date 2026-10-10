@@ -30,7 +30,7 @@ The `api/[...path].mjs` serverless function handles the Neon-backed API. Add `DA
 
 ## Local data
 
-The local SQLite database at `data/braidy.sqlite` and uploads in `public/uploads/` remain as a backup after migration. New site content, bookings, admin accounts, sessions, invitations, and uploaded photos are stored in Neon. Set `BRAIDY_API_PORT` to change the API port.
+The local SQLite database at `data/braidy.sqlite` and uploads in `public/uploads/` remain as a backup after migration. New site content, bookings, admin accounts, sessions, invitations, and uploaded media are stored in Neon. In the admin Photos tab, upload photos or MP4/WebM clips up to 2.8 MB; video is available for every media slot except the logo. Set `BRAIDY_API_PORT` to change the API port.
 
 Open `/#/admin` and create the first admin account with an email address and a password of at least 10 characters. Additional admins can be invited by email from the Admins tab; invitations are stored in Neon and do not send email. An invited person creates an account using the invited email address.
 

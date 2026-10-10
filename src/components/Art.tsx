@@ -112,9 +112,10 @@ interface VisualProps {
 
 // Shows a real photo when `src` is set, otherwise an on-brand illustrated placeholder.
 export function Visual({ src, alt, pattern, tone = 0, ratio = '4/5', className = '', eager }: VisualProps) {
+  const isVideo = !!src && /\.(mp4|webm)(?:$|[?#])/i.test(src);
   return (
     <div className={`relative overflow-hidden bg-beige ${className}`} style={{ aspectRatio: ratio }} role="img" aria-label={alt}>
-      {src ? <img src={src} alt="" loading={eager ? 'eager' : 'lazy'} className="h-full w-full object-cover" /> : <Art pattern={pattern} tone={tone} />}
+      {isVideo ? <video src={src} muted autoPlay loop playsInline preload={eager ? 'auto' : 'metadata'} aria-hidden="true" className="h-full w-full object-cover" /> : src ? <img src={src} alt="" loading={eager ? 'eager' : 'lazy'} className="h-full w-full object-cover" /> : <Art pattern={pattern} tone={tone} />}
     </div>
   );
 }

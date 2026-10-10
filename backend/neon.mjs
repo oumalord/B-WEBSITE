@@ -9,10 +9,11 @@ import pg from 'pg';
 const { Pool } = pg;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST_DIR = path.join(ROOT, 'dist');
-const MAX_BODY = 7 * 1024 * 1024;
+const MAX_BODY = 4 * 1024 * 1024;
 const STATUSES = ['new', 'confirmed', 'declined', 'done'];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const IMG = /^img\/[\w.-]+$/;
+const MEDIA = /^media\/[\w.-]+$/;
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is required. Set it in .env.local or your environment.');
@@ -110,7 +111,7 @@ async function createSession(adminId) {
 }
 
 function collectImagePaths(value, paths = new Set()) {
-  if (typeof value === 'string' && IMG.test(value)) paths.add(value);
+  if (typeof value === 'string' && (IMG.test(value) || MEDIA.test(value))) paths.add(value);
   else if (Array.isArray(value)) value.forEach((item) => collectImagePaths(item, paths));
   else if (value && typeof value === 'object') Object.values(value).forEach((item) => collectImagePaths(item, paths));
   return paths;
@@ -119,11 +120,16 @@ function collectImagePaths(value, paths = new Set()) {
 async function imageUrls(value) {
   const paths = [...collectImagePaths(value)];
   if (!paths.length) return {};
-  const { rows } = await pool.query('SELECT path FROM images WHERE path = ANY($1::text[])', [paths]);
-  return Object.fromEntries(rows.map(({ path: imagePath }) => [
-    imagePath,
-    `/api/images/${encodeURIComponent(imagePath.slice(4))}`,
-  ]));
+  const imagePaths = paths.filter((imagePath) => IMG.test(imagePath));
+  const mediaPaths = paths.filter((mediaPath) => MEDIA.test(mediaPath));
+  const [images, media] = await Promise.all([
+    imagePaths.length ? pool.query('SELECT path FROM images WHERE path = ANY($1::text[])', [imagePaths]) : { rows: [] },
+    mediaPaths.length ? pool.query('SELECT path FROM media WHERE path = ANY($1::text[])', [mediaPaths]) : { rows: [] },
+  ]);
+  return Object.fromEntries([
+    ...images.rows.map(({ path: imagePath }) => [imagePath, `/api/images/${encodeURIComponent(imagePath.slice(4))}`]),
+    ...media.rows.map(({ path: mediaPath }) => [mediaPath, `/api/media/${encodeURIComponent(mediaPath.slice(6))}`]),
+  ]);
 }
 
 function resolveImages(value, urls) {
@@ -144,6 +150,39 @@ function sendImage(response, image) {
   response.end(image.data);
 }
 
+function sendMedia(request, response, media) {
+  const data = Buffer.from(media.data);
+  const range = request.headers.range?.match(/^bytes=(\d*)-(\d*)$/);
+  if (range) {
+    const start = range[1] ? Number(range[1]) : 0;
+    const end = range[2] ? Math.min(Number(range[2]), data.length - 1) : data.length - 1;
+    if (start >= data.length || end < start) {
+      response.writeHead(416, { 'Content-Range': `bytes */${data.length}` });
+      response.end();
+      return;
+    }
+    const chunk = data.subarray(start, end + 1);
+    response.writeHead(206, {
+      'Content-Type': media.content_type,
+      'Content-Length': chunk.length,
+      'Content-Range': `bytes ${start}-${end}/${data.length}`,
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    response.end(chunk);
+    return;
+  }
+  response.writeHead(200, {
+    'Content-Type': media.content_type,
+    'Content-Length': data.length,
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'X-Content-Type-Options': 'nosniff',
+  });
+  response.end(data);
+}
+
 export async function handleApi(request, response, url) {
   const method = request.method ?? 'GET';
   const pathname = url.pathname;
@@ -160,6 +199,14 @@ export async function handleApi(request, response, url) {
     const { rows } = await pool.query('SELECT content_type, data FROM images WHERE path = $1', [`img/${imageRoute[1]}`]);
     if (!rows[0]) throw new HttpError(404, 'Image not found');
     sendImage(response, rows[0]);
+    return;
+  }
+
+  const mediaRoute = pathname.match(/^\/api\/media\/([\w.-]+)$/);
+  if (method === 'GET' && mediaRoute) {
+    const { rows } = await pool.query('SELECT content_type, data FROM media WHERE path = $1', [`media/${mediaRoute[1]}`]);
+    if (!rows[0]) throw new HttpError(404, 'Media not found');
+    sendMedia(request, response, rows[0]);
     return;
   }
 
@@ -287,18 +334,26 @@ export async function handleApi(request, response, url) {
   }
 
   if (method === 'POST' && pathname === '/api/admin/upload') {
-    if (typeof body.data !== 'string' || body.data.length < 100) throw new HttpError(400, 'No image received');
-    if (body.data.length > 5500000) throw new HttpError(413, 'Image is too large');
+    if (typeof body.data !== 'string' || body.data.length < 100) throw new HttpError(400, 'No media received');
+    if (body.data.length > 4000000) throw new HttpError(413, 'Media is too large');
+    const extensions = {
+      'image/jpeg': ['jpg', 'img'],
+      'image/png': ['png', 'img'],
+      'image/webp': ['webp', 'img'],
+      'video/mp4': ['mp4', 'media'],
+      'video/webm': ['webm', 'media'],
+    };
     const contentType = clean(body.contentType, 50);
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(contentType)) {
-      throw new HttpError(400, 'Unsupported image type');
-    }
-    const filename = `${randomUUID()}.${contentType === 'image/jpeg' ? 'jpg' : contentType.slice(6)}`;
-    const imagePath = `img/${filename}`;
-    await pool.query('INSERT INTO images (path, content_type, data) VALUES ($1, $2, $3)', [
-      imagePath, contentType, Buffer.from(body.data, 'base64'),
+    const fileType = extensions[contentType];
+    if (!fileType) throw new HttpError(400, 'Use a JPEG, PNG, WebP, MP4, or WebM file');
+    const filename = `${randomUUID()}.${fileType[0]}`;
+    const mediaPath = `${fileType[1]}/${filename}`;
+    const table = fileType[1] === 'img' ? 'images' : 'media';
+    await pool.query(`INSERT INTO ${table} (path, content_type, data) VALUES ($1, $2, $3)`, [
+      mediaPath, contentType, Buffer.from(body.data, 'base64'),
     ]);
-    sendJson(response, 200, { path: imagePath, url: `/api/images/${encodeURIComponent(filename)}` });
+    const urlPrefix = fileType[1] === 'img' ? '/api/images/' : '/api/media/';
+    sendJson(response, 200, { path: mediaPath, url: `${urlPrefix}${encodeURIComponent(filename)}` });
     return;
   }
 

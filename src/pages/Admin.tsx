@@ -56,10 +56,27 @@ const shrink = (f: File) =>
     img.src = u;
   });
 
+const encodeVideo = (file: File) => new Promise<{ data: string; contentType: string }>((resolve, reject) => {
+  if (file.size > 2_800_000) {
+    reject(new Error('Videos must be 2.8 MB or smaller.'));
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = String(reader.result ?? '');
+    const comma = result.indexOf(',');
+    if (comma < 0) reject(new Error('Could not read this video.'));
+    else resolve({ data: result.slice(comma + 1), contentType: file.type });
+  };
+  reader.onerror = () => reject(new Error('Could not read this video.'));
+  reader.readAsDataURL(file);
+});
+
 function ImageField({ value, onChange, ctx, label = 'image' }: { value: string; onChange: (v: string) => void; ctx: Ctx; label?: string }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const isLogo = /logo/i.test(label);
+  const isVideo = /\.(mp4|webm)(?:$|[?#])/i.test(value);
   const url = value ? (/^(https?:|\/)/.test(value) ? value : ctx.urls[value] ?? '') : '';
   const pick = async (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -67,12 +84,13 @@ function ImageField({ value, onChange, ctx, label = 'image' }: { value: string; 
     setBusy(true);
     setErr('');
     try {
-      const { data, contentType } = await shrink(f);
+      const { data, contentType } = f.type.startsWith('video/') ? await encodeVideo(f) : await shrink(f);
+      if (data.length > 4000000) throw new Error('File is too large. Choose a smaller image or video.');
       const { data: r } = await api.post('/api/admin/upload', { data, contentType });
       ctx.setUrl(r.path, r.url);
       onChange(r.path);
-    } catch {
-      setErr('Upload failed. Try a different or smaller image.');
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : 'Upload failed. Try a smaller file.');
     } finally {
       setBusy(false);
       e.target.value = '';
@@ -80,13 +98,14 @@ function ImageField({ value, onChange, ctx, label = 'image' }: { value: string; 
   };
   return (
     <div className="flex flex-wrap items-center gap-4">
-      {url ? <img src={url} alt={`${label} preview`} className={`rounded ${isLogo ? 'h-16 w-40 bg-white p-1 object-contain' : 'h-24 w-24 object-cover'}`} /> : <div className={`flex items-center justify-center rounded border border-dashed border-gold/40 text-xs text-ink/50 ${isLogo ? 'h-16 w-40' : 'h-24 w-24'}`}>No image uploaded</div>}
+      {url ? isVideo ? <video src={url} controls muted playsInline preload="metadata" aria-label={`${label} preview`} className="h-24 w-40 rounded bg-night object-contain" /> : <img src={url} alt={`${label} preview`} className={`rounded ${isLogo ? 'h-16 w-40 bg-white p-1 object-contain' : 'h-24 w-24 object-cover'}`} /> : <div className={`flex items-center justify-center rounded border border-dashed border-gold/40 text-xs text-ink/50 ${isLogo ? 'h-16 w-40' : 'h-24 w-24'}`}>No media uploaded</div>}
       <div className="space-y-2">
         <label className="btn-ghost cursor-pointer !min-h-[40px] !px-4 !text-xs">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}{value ? 'Replace image' : 'Upload image'}
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={pick} disabled={busy} />
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}{value ? 'Replace media' : 'Upload media'}
+          <input type="file" accept={isLogo ? 'image/jpeg,image/png,image/webp' : 'image/jpeg,image/png,image/webp,video/mp4,video/webm'} className="sr-only" onChange={pick} disabled={busy} />
         </label>
-        {value && <button type="button" onClick={() => onChange('')} className="block text-xs text-ink/60 underline">Remove photo</button>}
+        {!isLogo && <p className="text-xs text-ink/50">Photos or MP4/WebM videos up to 2.8 MB.</p>}
+        {value && <button type="button" onClick={() => onChange('')} className="block text-xs text-ink/60 underline">Remove media</button>}
         {err && <p className="err">{err}</p>}
       </div>
     </div>

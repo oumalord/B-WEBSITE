@@ -42,22 +42,22 @@ export default function Home() {
       </div>
 
       <section aria-label="Highlights" className="border-b border-plum/10 bg-beige">
-        <ul className="wrap grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="wrap grid grid-cols-2 gap-4 py-8 sm:gap-8 sm:py-12 lg:grid-cols-4">
           {c.highlights.map((h, i) => {
             const Icon = icons[i % icons.length];
-            return <li key={h.title}><Icon className="h-6 w-6 text-gold" aria-hidden="true" /><h2 className="mt-3 text-xl text-plum">{h.title}</h2><p className="mt-1 text-sm text-ink/70">{h.text}</p></li>;
+            return <li key={h.title}><Icon className="h-5 w-5 text-gold sm:h-6 sm:w-6" aria-hidden="true" /><h2 className="mt-2 text-base text-plum sm:mt-3 sm:text-xl">{h.title}</h2><p className="mt-1 text-xs text-ink/70 sm:text-sm">{h.text}</p></li>;
           })}
         </ul>
       </section>
 
       <section className="section">
-        <div className="wrap grid items-center gap-12 lg:grid-cols-2">
+        <div className="wrap grid grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] items-center gap-4 py-10 sm:gap-12 sm:py-28 lg:grid-cols-2">
           <Visual src={c.aboutImage} alt="About BRAIDY SALON" pattern="twists" tone={1} ratio="4/5" className="max-w-md" />
-          <div>
+          <div className="min-w-0">
             <p className="eyebrow">{c.aboutEyebrow}</p>
-            <h2 className="h2">{c.aboutTitle}</h2>
-            <p className="lead">{c.aboutText}</p>
-            <Link to="/about" className="btn-ghost mt-8">{c.aboutButton}</Link>
+            <h2 className="h2 text-xl sm:text-3xl lg:text-5xl">{c.aboutTitle}</h2>
+            <p className="lead mt-3 text-xs sm:mt-5 sm:text-lg">{c.aboutText}</p>
+            <Link to="/about" className="btn-ghost mt-4 !min-h-[40px] !px-3 !text-[10px] sm:mt-8 sm:!min-h-[48px] sm:!px-7 sm:!text-sm">{c.aboutButton}</Link>
           </div>
         </div>
       </section>
@@ -85,7 +85,7 @@ export default function Home() {
         <div className="wrap">
           <p className="eyebrow">{c.whyEyebrow}</p>
           <h2 className="h2">{c.whyTitle}</h2>
-          <dl className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">{c.why.map((w) => <div key={w.title} className="border-t border-gold/60 pt-5"><dt className="font-serif text-xl">{w.title}</dt><dd className="mt-2 text-sm text-cream/80">{w.text}</dd></div>)}</dl>
+          <dl className="mt-8 grid grid-cols-2 gap-5 sm:mt-12 sm:gap-10 lg:grid-cols-4">{c.why.map((w) => <div key={w.title} className="border-t border-gold/60 pt-3 sm:pt-5"><dt className="font-serif text-base sm:text-xl">{w.title}</dt><dd className="mt-2 text-xs text-cream/80 sm:text-sm">{w.text}</dd></div>)}</dl>
         </div>
       </section>
 
@@ -104,7 +104,7 @@ export default function Home() {
         <section className="section">
           <div className="wrap">
             <h2 className="h2">Kind words</h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">{testimonials.map((t) => <figure key={t.name} className="border border-plum/15 bg-surface p-6"><blockquote className="font-serif text-lg text-plum">{t.text}</blockquote><figcaption className="mt-4 text-sm">{t.name}</figcaption></figure>)}</div>
+            <div className="mt-6 grid grid-cols-2 gap-3 md:mt-10 md:grid-cols-3 md:gap-6">{testimonials.map((t) => <figure key={t.name} className="border border-plum/15 bg-surface p-3 sm:p-6"><blockquote className="font-serif text-sm text-plum sm:text-lg">{t.text}</blockquote><figcaption className="mt-3 text-xs sm:mt-4 sm:text-sm">{t.name}</figcaption></figure>)}</div>
           </div>
         </section>
       )}

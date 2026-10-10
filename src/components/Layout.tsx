@@ -273,6 +273,12 @@ export default function Layout() {
             <p>
               © {new Date().getFullYear()} {site.name}. All rights reserved.
             </p>
+            <p className="text-cream/60">
+              Developed by{' '}
+              <a href="https://amanicodesolutions.vercel.app" target="_blank" rel="noopener noreferrer" className="text-cream/85 underline underline-offset-4 hover:text-gold">
+                AmaniCode Solutions
+              </a>
+            </p>
             <p className="flex gap-5">
               <Link to="/privacy" className="py-1 hover:text-gold">
                 Privacy Policy

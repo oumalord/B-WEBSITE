@@ -1,0 +1,43 @@
+[
+  {
+    "name": "Filter gallery and use the lightbox",
+    "viewport": "desktop",
+    "covers": ["gallery category filters", "lightbox open and keyboard close", "book this look link"],
+    "description": "Verifies the gallery filter narrows styles and the lightbox opens and closes.",
+    "steps": ["Open the Gallery page", "Click the Cornrows filter button", "Click the first image to open the enlarged view", "Press the Escape key"],
+    "expected": "Only Cornrows styles are listed, an enlarged dialog with a Book This Look link appears, and it closes after Escape."
+  },
+  {
+    "name": "Mobile menu and book a service",
+    "viewport": "mobile",
+    "covers": ["mobile hamburger navigation", "services page", "service preselected on booking page"],
+    "description": "Verifies the mobile menu navigates to Services and Book This Style preselects the service.",
+    "steps": ["Open the home page", "Open the menu using the menu button", "Tap Services", "Tap Book This Style on the Knotless Braids card"],
+    "expected": "The Booking page opens with Knotless Braids selected in the Preferred service field."
+  },
+  {
+    "name": "Booking validation and saved request",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": ["required field validation", "booking saved through backend api", "truthful non-confirmed message"],
+    "description": "Verifies invalid submissions are blocked and a valid one is saved without claiming confirmation.",
+    "steps": ["Open the Booking page", "Click Submit Booking Request with empty fields", "Fill name Amina Test, phone 0712345678, service Cornrows, a future date, and time 09:00", "Click Submit Booking Request"],
+    "expected": "Validation messages appear for the empty form; after valid input a Request received message appears saying it is not a confirmed appointment yet."
+  },
+  {
+    "name": "Admin area requires sign in",
+    "viewport": "desktop",
+    "covers": ["admin route guard", "anonymous denial", "admin api protection"],
+    "description": "Verifies visitors who are not signed in cannot see the admin editor.",
+    "steps": ["Open the /#/admin route without signing in"],
+    "expected": "A Website admin heading with a Sign in button is shown, and no content editor or Save changes button is visible."
+  },
+  {
+    "name": "FAQ accordion and 404 page",
+    "viewport": "desktop",
+    "covers": ["faq accordion expand", "custom 404 page", "link back to homepage"],
+    "description": "Verifies an FAQ item expands and unknown routes show the 404 page with a way home.",
+    "steps": ["Open the home page and click the question How long does braiding take?", "Navigate to the unknown route /#/nope", "Click Back to Homepage"],
+    "expected": "The answer is revealed, the 404 message is shown for the unknown route, and the homepage hero headline appears after clicking back."
+  }
+]

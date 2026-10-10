@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; color-scheme: dark; }
+  body { @apply bg-night font-sans text-ink antialiased; }
+  h1, h2, h3 { @apply font-serif tracking-tight; }
+  ::selection { background: #C9A25C; color: #0B0908; }
+  :focus-visible { outline: 2px solid #E2C37E; outline-offset: 3px; }
+  h1 em {
+    background: linear-gradient(90deg, #F2E3BF, #C9A25C 50%, #F2E3BF);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-7xl px-5 sm:px-8; }
+  .section { @apply py-20 sm:py-28; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.28em] text-gold; }
+  .h2 { @apply mt-3 text-3xl leading-tight text-[#F6EFE2] sm:text-5xl; }
+  .lead { @apply mt-5 max-w-xl text-base leading-relaxed text-ink/75 sm:text-lg; }
+  .btn-primary,
+  .btn-gold { @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-gradient-to-b from-[#EBCF92] to-[#B8935A] px-7 text-sm font-semibold uppercase tracking-wider text-night shadow-[0_0_24px_rgba(201,162,92,0.25)] transition duration-300 hover:brightness-110; }
+  .btn-ghost { @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-gold/60 px-7 text-sm font-semibold uppercase tracking-wider text-plum transition duration-300 hover:bg-gold hover:text-night; }
+  .input { @apply min-h-[48px] w-full rounded-lg border border-gold/25 bg-night/60 px-4 text-base text-ink transition placeholder:text-ink/40 focus:border-gold; }
+  .input[aria-invalid='true'] { @apply border-red-400; }
+  .label { @apply mb-1.5 block text-sm font-medium text-ink; }
+  .err { @apply mt-1.5 text-sm text-red-400; }
+  .rise { animation: rise 0.7s ease both; }
+  .hero-glow {
+    background-image:
+      radial-gradient(60% 70% at 82% 30%, rgba(201, 162, 92, 0.2), transparent 60%),
+      radial-gradient(40% 50% at 8% 95%, rgba(201, 162, 92, 0.09), transparent 60%);
+  }
+  .cta-glow {
+    background-color: #050403;
+    background-image: radial-gradient(55% 90% at 50% 0%, rgba(201, 162, 92, 0.25), transparent 70%);
+    border-top: 1px solid rgba(201, 162, 92, 0.35);
+  }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

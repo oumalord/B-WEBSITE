@@ -1,10 +1,6 @@
-import { ensureSchema, handleApi } from '../backend/neon.mjs';
+import { ensureSchema, handleApi } from './neon.mjs';
 
-export const config = {
-  api: { bodyParser: false },
-};
-
-export default async function handler(request, response) {
+export async function handleVercelRequest(request, response) {
   try {
     await ensureSchema();
     const url = new URL(request.url ?? '/', `https://${request.headers.host ?? 'localhost'}`);

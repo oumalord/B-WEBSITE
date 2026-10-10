@@ -5,6 +5,7 @@ import {
   Clock,
   Facebook,
   Instagram,
+  LockKeyhole,
   Mail,
   MapPin,
   Menu,
@@ -278,6 +279,10 @@ export default function Layout() {
               </Link>
               <Link to="/terms" className="py-1 hover:text-gold">
                 Terms of Service
+              </Link>
+              <Link to="/admin" aria-label="Admin login" title="Admin login" className="inline-flex items-center gap-1 py-1 hover:text-gold">
+                <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
+                Admin login
               </Link>
             </p>
           </div>

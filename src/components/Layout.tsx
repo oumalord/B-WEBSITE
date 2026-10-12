@@ -46,7 +46,6 @@ export default function Layout() {
   const { pathname } = useLocation();
   const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [bar, setBar] = useState(site.announcement.enabled);
 
   useEffect(() => {
     setMenu(false);
@@ -76,25 +75,6 @@ export default function Layout() {
       >
         Skip to content
       </a>
-      {bar && (
-        <div className="relative bg-plum-deep px-10 py-2 text-center text-xs text-cream sm:text-sm">
-          {site.announcement.text}{' '}
-          <Link
-            to={site.announcement.linkTo}
-            className="font-semibold text-gold underline underline-offset-4"
-          >
-            {site.announcement.linkLabel}
-          </Link>
-          <button
-            type="button"
-            onClick={() => setBar(false)}
-            aria-label="Dismiss announcement"
-            className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
       <header className="sticky top-0 z-50 border-b border-plum/10 bg-night/95 backdrop-blur">
         <div className="wrap flex h-[72px] items-center justify-between">
           <Link to="/" aria-label="BRAIDY SALON home">

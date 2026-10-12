@@ -15,12 +15,6 @@ export const site = {
   },
   social: { instagram: 'https://www.instagram.com/braidysaloon_roysambu/', facebook: '' },
   hours: [{ days: 'Daily', time: 'from 7:00 am, last booking 7:00 pm' }],
-  announcement: {
-    enabled: true,
-    text: 'Your next hairstyle is waiting for you.',
-    linkLabel: 'Book your appointment today',
-    linkTo: '/booking',
-  },
   currency: 'KSh ',
   pricesAreSample: true, // set false once real prices are entered
   timeSlots: ['07:00', '09:00', '11:00', '13:00', '15:00', '17:00', '19:00'],

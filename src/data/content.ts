@@ -9,6 +9,7 @@ export interface Service {
   from: number; // SAMPLE price until supplied
   duration: string; // SAMPLE duration until supplied
   image?: string;
+  images?: string[];
 }
 
 export const services: Service[] = [

@@ -112,7 +112,21 @@ function ImageField({ value, onChange, ctx, label = 'image' }: { value: string; 
   );
 }
 
-function PhotosPanel({ content, ctx, update }: { content: Json; ctx: Ctx; update: (path: string[], value: string) => void }) {
+function ServiceImagesField({ value, onChange, ctx, label }: { value: string[]; onChange: (images: string[]) => void; ctx: Ctx; label: string }) {
+  const photos = Array.from({ length: 3 }, (_, index) => value[index] ?? '');
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {photos.map((photo, index) => (
+        <div key={index} className="space-y-2 border border-gold/15 p-3">
+          <p className="text-xs font-medium text-ink/70">Photo {index + 1} of 3</p>
+          <ImageField label={`${label} photo ${index + 1}`} value={photo} onChange={(next) => onChange(photos.map((current, slot) => slot === index ? next : current))} ctx={ctx} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PhotosPanel({ content, ctx, update }: { content: Json; ctx: Ctx; update: (path: string[], value: Json) => void }) {
   const field = (label: string, path: string, note?: string) => {
     const segments = path.split('.');
     return (
@@ -139,8 +153,18 @@ function PhotosPanel({ content, ctx, update }: { content: Json; ctx: Ctx; update
       </section>
       <section className="space-y-4">
         <h2 className="text-2xl text-plum">Service photos</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {content.services.map((service: Json, index: number) => field(service.name || `Service ${index + 1}`, `services.${index}.image`))}
+        <div className="space-y-4">
+          {content.services.map((service: Json, index: number) => (
+            <div key={service.id ?? index} className="space-y-3 border border-gold/25 bg-surface p-4">
+              <h3 className="font-medium text-plum">{service.name || `Service ${index + 1}`}</h3>
+              <ServiceImagesField
+                label={service.name || `Service ${index + 1}`}
+                value={Array.isArray(service.images) ? service.images : service.image ? [service.image] : []}
+                onChange={(images) => update(['services', String(index), 'images'], images)}
+                ctx={ctx}
+              />
+            </div>
+          ))}
         </div>
       </section>
       <section className="space-y-4">
@@ -155,6 +179,9 @@ function PhotosPanel({ content, ctx, update }: { content: Json; ctx: Ctx; update
 
 function Node({ label, value, onChange, ctx }: { label: string; value: Json; onChange: (v: Json) => void; ctx: Ctx }) {
   const showLabel = !/^\d+$/.test(label);
+  if (label === 'images' && Array.isArray(value)) {
+    return <ServiceImagesField value={value} onChange={onChange} ctx={ctx} label="Service" />;
+  }
   if (Array.isArray(value)) {
     const tpl = value.length ? blank(value[0]) : TEMPLATES[label] ?? '';
     const swap = (i: number, j: number) => {
@@ -277,7 +304,10 @@ export default function Admin() {
   const load = useCallback(async () => {
     const { data } = await api.get('/api/admin/content');
     const merged = merge(DEFAULTS, data.content);
-    merged.services = merged.services.map((s: Json) => ({ ...s, image: s.image ?? '' }));
+    merged.services = merged.services.map((s: Json) => {
+      const { image, ...service } = s;
+      return { ...service, images: (Array.isArray(s.images) ? s.images : image ? [image] : []).filter(Boolean).slice(0, 3) };
+    });
     merged.gallery = merged.gallery.map((g: Json) => ({ ...g, image: g.image ?? '' }));
     setContent(merged);
     setUrls(data.urls ?? {});

@@ -9,7 +9,10 @@ type Json = any;
 type Ctx = { urls: Record<string, string>; setUrl: (p: string, u: string) => void; services: { id: string; name: string }[] };
 
 const PATTERNS = ['plaits', 'box', 'cornrows', 'twists', 'locs', 'fulani', 'natural'];
-const TEMPLATES: Record<string, Json> = { testimonials: { name: '', text: '', rating: 5 } };
+const TEMPLATES: Record<string, Json> = {
+  services: { id: 'nails', name: 'Nails', description: '', pattern: 'natural', tone: 0, images: [] },
+  testimonials: { name: '', text: '', rating: 5 },
+};
 const TABS: Record<string, string[]> = {
   Photos: [],
   'Business details': ['site'],
@@ -183,7 +186,7 @@ function Node({ label, value, onChange, ctx }: { label: string; value: Json; onC
     return <ServiceImagesField value={value} onChange={onChange} ctx={ctx} label="Service" />;
   }
   if (Array.isArray(value)) {
-    const tpl = value.length ? blank(value[0]) : TEMPLATES[label] ?? '';
+    const tpl = label === 'services' ? TEMPLATES.services : value.length ? blank(value[0]) : TEMPLATES[label] ?? '';
     const swap = (i: number, j: number) => {
       if (j < 0 || j >= value.length) return;
       const n = [...value];
@@ -206,7 +209,7 @@ function Node({ label, value, onChange, ctx }: { label: string; value: Json; onC
             <Node label={String(i)} value={it} ctx={ctx} onChange={(x) => onChange(value.map((y: Json, k: number) => (k === i ? x : y)))} />
           </div>
         ))}
-        <button type="button" onClick={() => onChange([...value, tpl && typeof tpl === 'object' && 'id' in tpl ? { ...tpl, id: `n${Date.now()}` } : tpl])} className="btn-ghost !min-h-[40px] !px-4 !text-xs"><Plus className="h-4 w-4" />Add {human(label).toLowerCase()} item</button>
+        <button type="button" onClick={() => onChange([...value, tpl && typeof tpl === 'object' && 'id' in tpl ? { ...tpl, id: `n${Date.now()}` } : tpl])} className="btn-ghost !min-h-[40px] !px-4 !text-xs"><Plus className="h-4 w-4" />{label === 'services' ? 'Add service' : `Add ${human(label).toLowerCase()} item`}</button>
       </div>
     );
   }

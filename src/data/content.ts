@@ -6,8 +6,8 @@ export interface Service {
   description: string;
   pattern: Pattern;
   tone: number;
-  from: number; // SAMPLE price until supplied
-  duration: string; // SAMPLE duration until supplied
+  from?: number; // SAMPLE price until supplied
+  duration?: string; // SAMPLE duration until supplied
   image?: string;
   images?: string[];
 }
